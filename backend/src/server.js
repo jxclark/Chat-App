@@ -1,5 +1,6 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
+import cors from 'cors';
 import path from 'path';
 
 import authRoutes from './routes/auth.route.js';
@@ -13,6 +14,7 @@ const PORT = ENV.PORT;
 const __dirname = path.resolve();
 
 app.use(express.json());
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRoutes);
