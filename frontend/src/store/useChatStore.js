@@ -6,7 +6,7 @@ export const useChatStore = create((set, get) => ({
   allContacts: [],
   chats: [],
   messages: [],
-  activeTabe: 'chats',
+  activeTab: 'chats',
   selectedUser: null,
   isUsersLoading: false,
   isMessagesLoading: false,
@@ -17,14 +17,14 @@ export const useChatStore = create((set, get) => ({
     set({ isSoundEnabled: !get().isSoundEnabled });
   },
 
-  setActiveTab: (tab) => set({ activeTabe: tab }),
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setActiveTab: tab => set({ activeTab: tab }),
+  setSelectedUser: selectedUser => set({ selectedUser }),
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });
     try {
       const res = await axiosInstance.get('/messages/contacts');
-      set({ allContacts: res.data });   
+      set({ allContacts: res.data });
     } catch (error) {
       toast.error('Failed to fetch contacts. Please try again.');
       console.error('Failed to fetch contacts:', error);
