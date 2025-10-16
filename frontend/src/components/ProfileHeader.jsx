@@ -73,7 +73,10 @@ const ProfileHeader = () => {
         {/* Buttons */}
         <div className="flex gap-4 items-center">
           {/* Logout Button */}
-          <button className="text-slate-400 hover:text-slate-200 transition-colors">
+          <button
+            className="text-slate-400 hover:text-slate-200 transition-colors"
+            onClick={logout}
+          >
             <LogOutIcon className="size-5" />
           </button>
 
