@@ -61,7 +61,7 @@ export const useChatStore = create((set, get) => ({
   },
 
   sendMessage: async messageData => {
-    const { selectedUser, messages } = get();
+    const { selectedUser } = get();
     const { authUser } = useAuthStore.getState();
 
     const tempId = `twemp-${Date.now()}`;
@@ -76,18 +76,25 @@ export const useChatStore = create((set, get) => ({
       isOptimistic: true,
     };
     // immediately update the ui by adding the message
-    set({ messages: [...messages, optimisticMessage] });
+    set(state => ({ messages: [...state.messages, optimisticMessage] }));
 
     try {
       const res = await axiosInstance.post(
         `/messages/send/${selectedUser._id}`,
         messageData
       );
-      set({ messages: messages.concat(res.data) });
-      return res.data;
+      set(state => {
+        const idx = state.messages.findIndex(msg => msg._id === tempId);
+        if (idx === -1) return { messages: [...state.messages, res.data] };
+        const next = state.messages.slice();
+        next[idx] = res.data;
+        return { messages: next };
+      });
     } catch (error) {
       // remove the optimistic message on failure
-      set({ messages: messages });
+      set(state => ({
+        messages: state.messages.filter(msg => msg._id !== tempId),
+      }));
       toast.error('Failed to send message. Please try again.');
       console.error(error.response?.data?.message);
     }
