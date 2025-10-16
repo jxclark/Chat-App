@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { axiosInstance } from '../lib/axios.js';
 import { toast } from 'react-hot-toast';
+import { useAuthStore } from './useAuthStore.js';
 
 export const useChatStore = create((set, get) => ({
   allContacts: [],
@@ -56,6 +57,39 @@ export const useChatStore = create((set, get) => ({
       console.error('Failed to fetch messages:', error);
     } finally {
       set({ isMessagesLoading: false });
+    }
+  },
+
+  sendMessage: async messageData => {
+    const { selectedUser, messages } = get();
+    const { authUser } = useAuthStore.getState();
+
+    const tempId = `twemp-${Date.now()}`;
+
+    const optimisticMessage = {
+      _id: tempId,
+      senderId: authUser._id,
+      receiverId: selectedUser._id,
+      text: messageData.text,
+      image: messageData.image || null,
+      createdAt: new Date().toISOString(),
+      isOptimistic: true,
+    };
+    // immediately update the ui by adding the message
+    set({ messages: [...messages, optimisticMessage] });
+
+    try {
+      const res = await axiosInstance.post(
+        `/messages/send/${selectedUser._id}`,
+        messageData
+      );
+      set({ messages: messages.concat(res.data) });
+      return res.data;
+    } catch (error) {
+      // remove the optimistic message on failure
+      set({ messages: messages });
+      toast.error('Failed to send message. Please try again.');
+      console.error(error.response?.data?.message);
     }
   },
 }));
